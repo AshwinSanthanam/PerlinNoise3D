@@ -7,7 +7,7 @@ vector_set = [Vector(1, 1, 1), Vector(1, -1, 1), Vector(-1, 1, 1), Vector(-1, -1
 normalized_noise = None
 page = 0
 noise_size = 50
-grid_size = 4
+grid_size = 2
 
 
 def setup():

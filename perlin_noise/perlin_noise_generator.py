@@ -1,5 +1,4 @@
 import random
-from perlin_noise.noise_accumulator import NoiseAccumulator
 from perlin_noise.vector import Vector
 
 
@@ -11,16 +10,14 @@ class PerlinNoiseGenerator:
 
     def generate_noise(self):
         grid_vectors = self.__generate_grid_vectors()
-        noise_accumulator = NoiseAccumulator(self.__noise_size, self.__grid_size)
+        noise = PerlinNoiseGenerator.__init_noise(self.__noise_size * self.__grid_size)
         for grid_x in range(self.__grid_size):
             for grid_y in range(self.__grid_size):
                 for grid_z in range(self.__grid_size):
-                    print(f"({grid_x},{grid_y},{grid_z})")
-                    self.__generate_unit_noise(noise_accumulator, grid_vectors, grid_x, grid_y, grid_z)
-                    noise_accumulator.move_to_next_grid()
-        return noise_accumulator.noise
+                    self.__generate_unit_noise(noise, grid_vectors, grid_x, grid_y, grid_z)
+        return noise
 
-    def __generate_unit_noise(self, noise_accumulator, grid_vectors, grid_x, grid_y, grid_z):
+    def __generate_unit_noise(self, noise, grid_vectors, grid_x, grid_y, grid_z):
         max_len = self.__noise_size - 1
         for x in range(self.__noise_size):
             x_dist = x / max_len
@@ -47,7 +44,10 @@ class PerlinNoiseGenerator:
                     d = self.__interpolate(u_d, d_d, fade_y)
                     u = self.__interpolate(u_u, d_u, fade_y)
                     z_interpolated = self.__interpolate(d, u, fade_z)
-                    noise_accumulator.set_noise_value(x, y, z, z_interpolated)
+                    x_offset = self.__noise_size * grid_x
+                    y_offset = self.__noise_size * grid_y
+                    z_offset = self.__noise_size * grid_z
+                    noise[x_offset + x][y_offset + y][z_offset + z] = z_interpolated
 
     @classmethod
     def __interpolate(cls, lower_lim, upper_lim, pos):
@@ -72,3 +72,16 @@ class PerlinNoiseGenerator:
 
     def __get_random_vector(self):
         return self.__vector_set[random.randint(0, len(self.__vector_set) - 1)]
+
+    @staticmethod
+    def __init_noise(side):
+        noise_cube = []
+        for x in range(side):
+            noise_plane = []
+            for y in range(side):
+                noise_line = []
+                for z in range(side):
+                    noise_line.append(0)
+                noise_plane.append(noise_line)
+            noise_cube.append(noise_plane)
+        return noise_cube
