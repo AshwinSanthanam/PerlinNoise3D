@@ -1,4 +1,5 @@
 import pygame
+import math
 
 
 class PygameHelper:
@@ -11,10 +12,6 @@ class PygameHelper:
     @classmethod
     def fill_screen(cls, background=(0, 0, 0)):
         cls.__screen.fill(background)
-
-    @classmethod
-    def draw_line(cls, p1, p2, color=(255, 255, 255)):
-        pygame.draw.line(cls.__screen, color, p1, p2)
 
     @classmethod
     def draw_point(cls, point, color=(255, 255, 255)):
@@ -36,3 +33,16 @@ class PygameHelper:
             for y in range(len(image[x])):
                 color = image[x][y]
                 PygameHelper.draw_point((x, y), (color, color, color))
+
+    @classmethod
+    def draw_lines(cls, angles, side):
+        for x in range(len(angles)):
+            for y in range(len(angles[x])):
+                angle = angles[x][y]
+                x_center, y_center = (x + 1) * 2 * side, (y + 1) * 2 * side
+                x_target, y_target = side * math.cos(angle) + x_center, side * math.sin(angle) + y_center
+                pygame.draw.line(cls.__screen, (255, 255, 255), (x_center, y_center), (x_target, y_target))
+
+    @classmethod
+    def wait(cls, milli_seconds):
+        pygame.time.wait(milli_seconds)

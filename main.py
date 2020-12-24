@@ -19,6 +19,7 @@ def setup():
 
 def draw():
     global page
+    PygameHelper.fill_screen()
     PygameHelper.paint_image(normalized_noise[page])
     page += 1
     page %= grid_size * noise_size
