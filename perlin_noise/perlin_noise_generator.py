@@ -41,33 +41,36 @@ class PerlinNoiseGenerator:
             dist_x = self.__x_dim.compute_local_position(x)
             grid_x = self.__x_dim.compute_grid_vector_position(x)
             fade_x = fade(dist_x)
-            for y in range(self.__y_dim.range):
-                dist_y = self.__y_dim.compute_local_position(y)
-                grid_y = self.__y_dim.compute_grid_vector_position(y)
-                fade_y = fade(dist_y)
-                for z in range(self.__z_dim.range):
-                    dist_z = self.__z_dim.compute_local_position(z)
-                    grid_z = self.__z_dim.compute_grid_vector_position(z)
-                    fade_z = fade(dist_z)
-
-                    lu_d = grid_vectors[grid_x][grid_y][grid_z] * Vector(dist_x, dist_y, dist_z)
-                    ru_d = grid_vectors[grid_x + 1][grid_y][grid_z] * Vector(dist_x - 1, dist_y, dist_z)
-                    ld_d = grid_vectors[grid_x][grid_y + 1][grid_z] * Vector(dist_x, dist_y - 1, dist_z)
-                    rd_d = grid_vectors[grid_x + 1][grid_y + 1][grid_z] * Vector(dist_x - 1, dist_y - 1, dist_z)
-                    lu_u = grid_vectors[grid_x][grid_y][grid_z + 1] * Vector(dist_x, dist_y, dist_z - 1)
-                    ru_u = grid_vectors[grid_x + 1][grid_y][grid_z + 1] * Vector(dist_x - 1, dist_y, dist_z - 1)
-                    ld_u = grid_vectors[grid_x][grid_y + 1][grid_z + 1] * Vector(dist_x, dist_y - 1, dist_z - 1)
-                    rd_u = grid_vectors[grid_x + 1][grid_y + 1][grid_z + 1] * Vector(dist_x - 1, dist_y - 1, dist_z - 1)
-
-                    u_d = interpolate(lu_d, ru_d, fade_x)
-                    d_d = interpolate(ld_d, rd_d, fade_x)
-                    u_u = interpolate(lu_u, ru_u, fade_x)
-                    d_u = interpolate(ld_u, rd_u, fade_x)
-                    d = interpolate(u_d, d_d, fade_y)
-                    u = interpolate(u_u, d_u, fade_y)
-                    z_interpolated = interpolate(d, u, fade_z)
-                    noise[x][y][z] = z_interpolated
+            self.__generate_unit_noise(grid_vectors, x, grid_x, dist_x, fade_x, noise)
         return noise
+
+    def __generate_unit_noise(self, grid_vectors, x, grid_x, dist_x, fade_x, noise):
+        for y in range(self.__y_dim.range):
+            dist_y = self.__y_dim.compute_local_position(y)
+            grid_y = self.__y_dim.compute_grid_vector_position(y)
+            fade_y = fade(dist_y)
+            for z in range(self.__z_dim.range):
+                dist_z = self.__z_dim.compute_local_position(z)
+                grid_z = self.__z_dim.compute_grid_vector_position(z)
+                fade_z = fade(dist_z)
+
+                lu_d = grid_vectors[grid_x][grid_y][grid_z] * Vector(dist_x, dist_y, dist_z)
+                ru_d = grid_vectors[grid_x + 1][grid_y][grid_z] * Vector(dist_x - 1, dist_y, dist_z)
+                ld_d = grid_vectors[grid_x][grid_y + 1][grid_z] * Vector(dist_x, dist_y - 1, dist_z)
+                rd_d = grid_vectors[grid_x + 1][grid_y + 1][grid_z] * Vector(dist_x - 1, dist_y - 1, dist_z)
+                lu_u = grid_vectors[grid_x][grid_y][grid_z + 1] * Vector(dist_x, dist_y, dist_z - 1)
+                ru_u = grid_vectors[grid_x + 1][grid_y][grid_z + 1] * Vector(dist_x - 1, dist_y, dist_z - 1)
+                ld_u = grid_vectors[grid_x][grid_y + 1][grid_z + 1] * Vector(dist_x, dist_y - 1, dist_z - 1)
+                rd_u = grid_vectors[grid_x + 1][grid_y + 1][grid_z + 1] * Vector(dist_x - 1, dist_y - 1, dist_z - 1)
+
+                u_d = interpolate(lu_d, ru_d, fade_x)
+                d_d = interpolate(ld_d, rd_d, fade_x)
+                u_u = interpolate(lu_u, ru_u, fade_x)
+                d_u = interpolate(ld_u, rd_u, fade_x)
+                d = interpolate(u_d, d_d, fade_y)
+                u = interpolate(u_u, d_u, fade_y)
+                z_interpolated = interpolate(d, u, fade_z)
+                noise[x][y][z] = z_interpolated
 
     def __generate_grid_vectors(self) -> list[list[list[Vector]]]:
         grid_vectors = []
