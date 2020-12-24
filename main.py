@@ -1,6 +1,6 @@
 from perlin_noise.min_max_normalizer import MinMaxNormalizer
 from perlin_noise.perlin_noise_generator import PerlinNoiseGenerator, NoiseDimension
-from perlin_noise.vector import Vector
+from math_helper import Vector
 from pygame_helper import PygameHelper
 
 vector_set = [Vector(1, 1, 1), Vector(1, -1, 1), Vector(-1, 1, 1), Vector(-1, -1, 1), Vector(1, 1, -1), Vector(1, -1, -1), Vector(-1, 1, -1), Vector(-1, -1, -1)]

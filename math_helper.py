@@ -26,3 +26,11 @@ class Vector:
 
     def __str__(self):
         return f"(x: {self.__x}, y: {self.__y}, z: {self.__z})"
+
+
+def interpolate(lower_lim: float, upper_lim: float, pos: float) -> float:
+    return lower_lim + pos * (upper_lim - lower_lim)
+
+
+def fade(dist: float) -> float:
+    return 6 * (dist ** 5) - 15 * (dist ** 4) + 10 * (dist ** 3)

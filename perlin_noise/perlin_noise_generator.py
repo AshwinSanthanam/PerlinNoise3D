@@ -1,5 +1,6 @@
 import random
-from perlin_noise.vector import Vector
+from multiprocessing import Value
+from math_helper import Vector, interpolate, fade
 
 
 class NoiseDimension:
@@ -39,14 +40,18 @@ class PerlinNoiseGenerator:
         for x in range(self.__x_dim.range):
             dist_x = self.__x_dim.compute_local_position(x)
             grid_x = self.__x_dim.compute_grid_vector_position(x)
+            fade_x = fade(dist_x)
             noise_plane = []
             for y in range(self.__y_dim.range):
                 dist_y = self.__y_dim.compute_local_position(y)
                 grid_y = self.__y_dim.compute_grid_vector_position(y)
+                fade_y = fade(dist_y)
                 noise_line = []
                 for z in range(self.__z_dim.range):
                     dist_z = self.__z_dim.compute_local_position(z)
                     grid_z = self.__z_dim.compute_grid_vector_position(z)
+                    fade_z = fade(dist_z)
+
                     lu_d = grid_vectors[grid_x][grid_y][grid_z] * Vector(dist_x, dist_y, dist_z)
                     ru_d = grid_vectors[grid_x + 1][grid_y][grid_z] * Vector(dist_x - 1, dist_y, dist_z)
                     ld_d = grid_vectors[grid_x][grid_y + 1][grid_z] * Vector(dist_x, dist_y - 1, dist_z)
@@ -55,16 +60,14 @@ class PerlinNoiseGenerator:
                     ru_u = grid_vectors[grid_x + 1][grid_y][grid_z + 1] * Vector(dist_x - 1, dist_y, dist_z - 1)
                     ld_u = grid_vectors[grid_x][grid_y + 1][grid_z + 1] * Vector(dist_x, dist_y - 1, dist_z - 1)
                     rd_u = grid_vectors[grid_x + 1][grid_y + 1][grid_z + 1] * Vector(dist_x - 1, dist_y - 1, dist_z - 1)
-                    fade_x = self.__fade(dist_x)
-                    fade_y = self.__fade(dist_y)
-                    fade_z = self.__fade(dist_z)
-                    u_d = self.__interpolate(lu_d, ru_d, fade_x)
-                    d_d = self.__interpolate(ld_d, rd_d, fade_x)
-                    u_u = self.__interpolate(lu_u, ru_u, fade_x)
-                    d_u = self.__interpolate(ld_u, rd_u, fade_x)
-                    d = self.__interpolate(u_d, d_d, fade_y)
-                    u = self.__interpolate(u_u, d_u, fade_y)
-                    z_interpolated = self.__interpolate(d, u, fade_z)
+
+                    u_d = interpolate(lu_d, ru_d, fade_x)
+                    d_d = interpolate(ld_d, rd_d, fade_x)
+                    u_u = interpolate(lu_u, ru_u, fade_x)
+                    d_u = interpolate(ld_u, rd_u, fade_x)
+                    d = interpolate(u_d, d_d, fade_y)
+                    u = interpolate(u_u, d_u, fade_y)
+                    z_interpolated = interpolate(d, u, fade_z)
                     noise_line.append(z_interpolated)
                 noise_plane.append(noise_line)
             noise.append(noise_plane)
@@ -85,23 +88,3 @@ class PerlinNoiseGenerator:
 
     def __get_random_vector(self) -> Vector:
         return self.__vector_set[random.randint(0, len(self.__vector_set) - 1)]
-
-    def __init_noise(self) -> list[list[list[float]]]:
-        noise_cube = []
-        for x in range(self.__x_dim.range):
-            noise_plane = []
-            for y in range(self.__y_dim.range):
-                noise_line = []
-                for z in range(self.__z_dim.range):
-                    noise_line.append(0)
-                noise_plane.append(noise_line)
-            noise_cube.append(noise_plane)
-        return noise_cube
-
-    @staticmethod
-    def __interpolate(lower_lim: float, upper_lim: float, pos: float) -> float:
-        return lower_lim + pos * (upper_lim - lower_lim)
-
-    @staticmethod
-    def __fade(dist: float) -> float:
-        return 6 * (dist ** 5) - 15 * (dist ** 4) + 10 * (dist ** 3)

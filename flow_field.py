@@ -1,7 +1,7 @@
 import math
 import random
 
-from perlin_noise.vector import Vector
+from math_helper.vector import Vector
 
 
 class FlowField:
