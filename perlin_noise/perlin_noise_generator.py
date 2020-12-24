@@ -35,18 +35,16 @@ class PerlinNoiseGenerator:
         self.__vector_set = vector_set
 
     def generate_noise(self) -> list[list[list[float]]]:
-        noise = []
+        noise = self.__init_noise()
         grid_vectors = self.__generate_grid_vectors()
         for x in range(self.__x_dim.range):
             dist_x = self.__x_dim.compute_local_position(x)
             grid_x = self.__x_dim.compute_grid_vector_position(x)
             fade_x = fade(dist_x)
-            noise_plane = []
             for y in range(self.__y_dim.range):
                 dist_y = self.__y_dim.compute_local_position(y)
                 grid_y = self.__y_dim.compute_grid_vector_position(y)
                 fade_y = fade(dist_y)
-                noise_line = []
                 for z in range(self.__z_dim.range):
                     dist_z = self.__z_dim.compute_local_position(z)
                     grid_z = self.__z_dim.compute_grid_vector_position(z)
@@ -68,9 +66,7 @@ class PerlinNoiseGenerator:
                     d = interpolate(u_d, d_d, fade_y)
                     u = interpolate(u_u, d_u, fade_y)
                     z_interpolated = interpolate(d, u, fade_z)
-                    noise_line.append(z_interpolated)
-                noise_plane.append(noise_line)
-            noise.append(noise_plane)
+                    noise[x][y][z] = z_interpolated
         return noise
 
     def __generate_grid_vectors(self) -> list[list[list[Vector]]]:
@@ -88,3 +84,15 @@ class PerlinNoiseGenerator:
 
     def __get_random_vector(self) -> Vector:
         return self.__vector_set[random.randint(0, len(self.__vector_set) - 1)]
+
+    def __init_noise(self) -> list[list[list[float]]]:
+        noise_cube = []
+        for x in range(self.__x_dim.range):
+            noise_plane = []
+            for y in range(self.__y_dim.range):
+                noise_line = []
+                for z in range(self.__z_dim.range):
+                    noise_line.append(0)
+                noise_plane.append(noise_line)
+            noise_cube.append(noise_plane)
+        return noise_cube
