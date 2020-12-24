@@ -1,5 +1,5 @@
 class NoiseFragment:
-    def __init__(self, x_offset, y_offset, z_offset, noise):
+    def __init__(self, x_offset: int, y_offset: int, z_offset: int, noise: list[list[float]]):
         self.__x_offset = x_offset
         self.__y_offset = y_offset
         self.__z_offset = z_offset
