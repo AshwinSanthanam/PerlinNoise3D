@@ -1,5 +1,7 @@
 import random
-from multiprocessing import Value
+import math
+from shared_array import SharedArray
+from multiprocessing import Process
 from math_helper import Vector, interpolate, fade
 
 
@@ -34,13 +36,13 @@ class PerlinNoiseGenerator:
         self.__z_dim = z_dim
         self.__vector_set = vector_set
 
-    def generate_noise(self) -> list[list[list[float]]]:
-        noise = self.__init_noise()
+    def generate_noise(self) -> SharedArray:
+        shared_array = SharedArray(self.__x_dim.range, self.__y_dim.range, self.__z_dim.range)
         grid_vectors = self.__generate_grid_vectors()
-        unit_size_y = 50
-        unit_size_z = 50
-        process_count_y = self.__y_dim.range // unit_size_y
-        process_count_z = self.__z_dim.range // unit_size_z
+        unit_size_y = 30
+        unit_size_z = 30
+        process_count_y = math.ceil(self.__y_dim.range / unit_size_y)
+        process_count_z = math.ceil(self.__z_dim.range / unit_size_z)
         for x in range(self.__x_dim.range):
             dist_x = self.__x_dim.compute_local_position(x)
             grid_x = self.__x_dim.compute_grid_vector_position(x)
@@ -53,10 +55,11 @@ class PerlinNoiseGenerator:
                     z_offset = z_unit * unit_size_z
                     z_remaining = self.__z_dim.range - z_offset
                     z_len = unit_size_z if z_remaining >= unit_size_z else z_remaining
-                    self.__generate_unit_noise(grid_vectors, x, grid_x, dist_x, fade_x, noise, y_offset, y_len, z_offset, z_len)
-        return noise
+                    self.__generate_unit_noise(shared_array, grid_vectors, x, grid_x, dist_x, fade_x, y_offset, y_len, z_offset, z_len)
+        shared_array.normalize(0, 255)
+        return shared_array
 
-    def __generate_unit_noise(self, grid_vectors, x, grid_x, dist_x, fade_x, noise, y_offset, y_len, z_offset, z_len):
+    def __generate_unit_noise(self, shared_array, grid_vectors, x, grid_x, dist_x, fade_x, y_offset, y_len, z_offset, z_len):
         for y in range(y_offset, y_offset + y_len):
             dist_y = self.__y_dim.compute_local_position(y)
             grid_y = self.__y_dim.compute_grid_vector_position(y)
@@ -82,7 +85,7 @@ class PerlinNoiseGenerator:
                 d = interpolate(u_d, d_d, fade_y)
                 u = interpolate(u_u, d_u, fade_y)
                 z_interpolated = interpolate(d, u, fade_z)
-                noise[x][y][z] = z_interpolated
+                shared_array.set(x, y, z, z_interpolated)
 
     def __generate_grid_vectors(self) -> list[list[list[Vector]]]:
         grid_vectors = []
@@ -99,15 +102,3 @@ class PerlinNoiseGenerator:
 
     def __get_random_vector(self) -> Vector:
         return self.__vector_set[random.randint(0, len(self.__vector_set) - 1)]
-
-    def __init_noise(self) -> list[list[list[float]]]:
-        noise_cube = []
-        for x in range(self.__x_dim.range):
-            noise_plane = []
-            for y in range(self.__y_dim.range):
-                noise_line = []
-                for z in range(self.__z_dim.range):
-                    noise_line.append(0)
-                noise_plane.append(noise_line)
-            noise_cube.append(noise_plane)
-        return noise_cube

@@ -8,20 +8,19 @@ page = 0
 x_dim = NoiseDimension(10, 5)
 y_dim = NoiseDimension(50, 2)
 z_dim = NoiseDimension(50, 2)
-normalized_noise = None
+shared_array = None
 
 
 def setup():
-    global normalized_noise
-    noise = PerlinNoiseGenerator(x_dim, y_dim, z_dim, vector_set).generate_noise()
-    normalized_noise = MinMaxNormalizer(noise, 255).normalize()
+    global shared_array
+    shared_array = PerlinNoiseGenerator(x_dim, y_dim, z_dim, vector_set).generate_noise()
     PygameHelper.init(800, 800)
 
 
 def draw():
     global page
     PygameHelper.fill_screen()
-    PygameHelper.paint_image(normalized_noise[page])
+    PygameHelper.paint_shared_array(shared_array, page)
     page += 1
     page %= x_dim.range
     return True

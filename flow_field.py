@@ -1,7 +1,7 @@
 import math
 import random
 
-from math_helper.vector import Vector
+from math_helper import Vector
 
 
 class FlowField:

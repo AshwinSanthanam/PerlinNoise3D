@@ -1,5 +1,8 @@
+from shared_array import SharedArray
+
+
 class MinMaxNormalizer:
-    def __init__(self, noise, scale):
+    def __init__(self, noise: SharedArray, scale: float):
         self.__noise = noise
         self.__scale = scale
 
@@ -20,9 +23,10 @@ class MinMaxNormalizer:
 
     def __get_min(self):
         min_val = self.__noise[0][0][0]
-        for plane in self.__noise:
-            for row in plane:
-                for value in row:
+        for x in range(self.__noise.x_size):
+            for y in range(self.__noise.y_size):
+                for z in range(self.__noise.z_size):
+                    value = self.__noise.get()
                     min_val = value if min_val > value else min_val
         return min_val
 

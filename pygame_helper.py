@@ -1,5 +1,6 @@
 import pygame
 import math
+from shared_array import SharedArray
 
 
 class PygameHelper:
@@ -46,3 +47,10 @@ class PygameHelper:
     @classmethod
     def wait(cls, milli_seconds):
         pygame.time.wait(milli_seconds)
+
+    @classmethod
+    def paint_shared_array(cls, shared_array: SharedArray, page: int):
+        for y in range(shared_array.y_size):
+            for z in range(shared_array.z_size):
+                color = shared_array.get(page, y, z)
+                PygameHelper.draw_point((y, z), (color, color, color))
