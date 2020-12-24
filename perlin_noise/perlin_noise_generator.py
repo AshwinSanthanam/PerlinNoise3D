@@ -3,15 +3,17 @@ from perlin_noise.vector import Vector
 
 
 class PerlinNoiseGenerator:
-    def __init__(self, noise_size, grid_size, vector_set):
+    def __init__(self, noise_size, grid_size, noise_height, grid_height, vector_set):
         self.__noise_size = noise_size
         self.__grid_size = grid_size
+        self.__noise_height = noise_height
+        self.__grid_height = grid_height
         self.__vector_set = vector_set
 
     def generate_noise(self):
         grid_vectors = self.__generate_grid_vectors()
-        noise = PerlinNoiseGenerator.__init_noise(self.__noise_size * self.__grid_size)
-        for grid_x in range(self.__grid_size):
+        noise = self.__init_noise()
+        for grid_x in range(self.__grid_height):
             for grid_y in range(self.__grid_size):
                 for grid_z in range(self.__grid_size):
                     self.__generate_unit_noise(noise, grid_vectors, grid_x, grid_y, grid_z)
@@ -19,8 +21,9 @@ class PerlinNoiseGenerator:
 
     def __generate_unit_noise(self, noise, grid_vectors, grid_x, grid_y, grid_z):
         max_len = self.__noise_size - 1
-        for x in range(self.__noise_size):
-            x_dist = x / max_len
+        max_height = self.__noise_height - 1
+        for x in range(self.__noise_height):
+            x_dist = x / max_height
             for y in range(self.__noise_size):
                 y_dist = y / max_len
                 for z in range(self.__noise_size):
@@ -44,7 +47,7 @@ class PerlinNoiseGenerator:
                     d = self.__interpolate(u_d, d_d, fade_y)
                     u = self.__interpolate(u_u, d_u, fade_y)
                     z_interpolated = self.__interpolate(d, u, fade_z)
-                    x_offset = self.__noise_size * grid_x
+                    x_offset = self.__noise_height * grid_x
                     y_offset = self.__noise_size * grid_y
                     z_offset = self.__noise_size * grid_z
                     noise[x_offset + x][y_offset + y][z_offset + z] = z_interpolated
@@ -59,7 +62,7 @@ class PerlinNoiseGenerator:
 
     def __generate_grid_vectors(self):
         grid_vectors = []
-        for x in range(self.__grid_size):
+        for x in range(self.__grid_height):
             grid_plane = []
             for y in range(self.__grid_size + 1):
                 grid_line = []
@@ -73,14 +76,15 @@ class PerlinNoiseGenerator:
     def __get_random_vector(self):
         return self.__vector_set[random.randint(0, len(self.__vector_set) - 1)]
 
-    @staticmethod
-    def __init_noise(side):
+    def __init_noise(self):
+        noise_side = self.__noise_size * self.__grid_size
+        noise_height = self.__noise_height * self.__grid_height
         noise_cube = []
-        for x in range(side):
+        for x in range(noise_height):
             noise_plane = []
-            for y in range(side):
+            for y in range(noise_side):
                 noise_line = []
-                for z in range(side):
+                for z in range(noise_side):
                     noise_line.append(0)
                 noise_plane.append(noise_line)
             noise_cube.append(noise_plane)
