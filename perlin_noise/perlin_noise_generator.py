@@ -37,19 +37,31 @@ class PerlinNoiseGenerator:
     def generate_noise(self) -> list[list[list[float]]]:
         noise = self.__init_noise()
         grid_vectors = self.__generate_grid_vectors()
+        unit_size_y = 50
+        unit_size_z = 50
+        process_count_y = self.__y_dim.range // unit_size_y
+        process_count_z = self.__z_dim.range // unit_size_z
         for x in range(self.__x_dim.range):
             dist_x = self.__x_dim.compute_local_position(x)
             grid_x = self.__x_dim.compute_grid_vector_position(x)
             fade_x = fade(dist_x)
-            self.__generate_unit_noise(grid_vectors, x, grid_x, dist_x, fade_x, noise)
+            for y_unit in range(process_count_y):
+                y_offset = y_unit * unit_size_y
+                y_remaining = self.__y_dim.range - y_offset
+                y_len = unit_size_y if y_remaining >= unit_size_y else y_remaining
+                for z_unit in range(process_count_z):
+                    z_offset = z_unit * unit_size_z
+                    z_remaining = self.__z_dim.range - z_offset
+                    z_len = unit_size_z if z_remaining >= unit_size_z else z_remaining
+                    self.__generate_unit_noise(grid_vectors, x, grid_x, dist_x, fade_x, noise, y_offset, y_len, z_offset, z_len)
         return noise
 
-    def __generate_unit_noise(self, grid_vectors, x, grid_x, dist_x, fade_x, noise):
-        for y in range(self.__y_dim.range):
+    def __generate_unit_noise(self, grid_vectors, x, grid_x, dist_x, fade_x, noise, y_offset, y_len, z_offset, z_len):
+        for y in range(y_offset, y_offset + y_len):
             dist_y = self.__y_dim.compute_local_position(y)
             grid_y = self.__y_dim.compute_grid_vector_position(y)
             fade_y = fade(dist_y)
-            for z in range(self.__z_dim.range):
+            for z in range(z_offset, z_offset + z_len):
                 dist_z = self.__z_dim.compute_local_position(z)
                 grid_z = self.__z_dim.compute_grid_vector_position(z)
                 fade_z = fade(dist_z)
