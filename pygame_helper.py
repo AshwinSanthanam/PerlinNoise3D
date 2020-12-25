@@ -54,3 +54,7 @@ class PygameHelper:
             for z in range(shared_array.z_size):
                 color = shared_array.get(page, y, z)
                 PygameHelper.draw_point((y, z), (color, color, color))
+
+    @classmethod
+    def screen_shot(cls, full_path):
+        pygame.image.save(cls.__screen, full_path)

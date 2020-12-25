@@ -39,8 +39,9 @@ class PerlinNoiseGenerator:
     def generate_noise(self) -> SharedArray:
         shared_array = SharedArray(self.__x_dim.range, self.__y_dim.range, self.__z_dim.range)
         grid_vectors = self.__generate_grid_vectors()
-        unit_size_y = 30
-        unit_size_z = 30
+        tasks = []
+        unit_size_y = 250
+        unit_size_z = 250
         process_count_y = math.ceil(self.__y_dim.range / unit_size_y)
         process_count_z = math.ceil(self.__z_dim.range / unit_size_z)
         for x in range(self.__x_dim.range):
@@ -55,11 +56,16 @@ class PerlinNoiseGenerator:
                     z_offset = z_unit * unit_size_z
                     z_remaining = self.__z_dim.range - z_offset
                     z_len = unit_size_z if z_remaining >= unit_size_z else z_remaining
-                    self.__generate_unit_noise(shared_array, grid_vectors, x, grid_x, dist_x, fade_x, y_offset, y_len, z_offset, z_len)
+                    task = Process(target=self.generate_unit_noise, args=(shared_array, grid_vectors, x, grid_x, dist_x, fade_x, y_offset, y_len, z_offset, z_len))
+                    tasks.append(task)
+                    task.start()
+                    # self.generate_unit_noise(shared_array, grid_vectors, x, grid_x, dist_x, fade_x, y_offset, y_len, z_offset, z_len)
+        for task in tasks:
+            task.join()
         shared_array.normalize(0, 255)
         return shared_array
 
-    def __generate_unit_noise(self, shared_array, grid_vectors, x, grid_x, dist_x, fade_x, y_offset, y_len, z_offset, z_len):
+    def generate_unit_noise(self, shared_array, grid_vectors, x, grid_x, dist_x, fade_x, y_offset, y_len, z_offset, z_len):
         for y in range(y_offset, y_offset + y_len):
             dist_y = self.__y_dim.compute_local_position(y)
             grid_y = self.__y_dim.compute_grid_vector_position(y)
