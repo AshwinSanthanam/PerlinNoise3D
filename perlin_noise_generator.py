@@ -1,5 +1,7 @@
 import random
 import math
+
+from percentage_calculator import PercentageCalculator
 from shared_array import SharedArray
 from multiprocessing import Process
 from math_helper import Vector, interpolate, fade
@@ -30,11 +32,18 @@ class NoiseDimension:
 
 
 class PerlinNoiseGenerator:
-    def __init__(self, x_dim: NoiseDimension, y_dim: NoiseDimension, z_dim: NoiseDimension, vector_set: list[Vector]):
+    def __init__(
+            self,
+            x_dim: NoiseDimension,
+            y_dim: NoiseDimension,
+            z_dim: NoiseDimension,
+            vector_set: list[Vector],
+            percentage_calculator: PercentageCalculator):
         self.__x_dim = x_dim
         self.__y_dim = y_dim
         self.__z_dim = z_dim
         self.__vector_set = vector_set
+        self.__percentage_calculator = percentage_calculator
 
     def generate_noise(self) -> SharedArray:
         shared_array = SharedArray(self.__x_dim.range, self.__y_dim.range, self.__z_dim.range)
@@ -59,7 +68,6 @@ class PerlinNoiseGenerator:
                     task = Process(target=self.generate_unit_noise, args=(shared_array, grid_vectors, x, grid_x, dist_x, fade_x, y_offset, y_len, z_offset, z_len))
                     tasks.append(task)
                     task.start()
-                    # self.generate_unit_noise(shared_array, grid_vectors, x, grid_x, dist_x, fade_x, y_offset, y_len, z_offset, z_len)
         for task in tasks:
             task.join()
         shared_array.normalize(0, 255)
