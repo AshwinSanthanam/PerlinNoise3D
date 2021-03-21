@@ -37,13 +37,11 @@ class PerlinNoiseGenerator:
             x_dim: NoiseDimension,
             y_dim: NoiseDimension,
             z_dim: NoiseDimension,
-            vector_set: list[Vector],
-            percentage_calculator: PercentageCalculator):
+            vector_set: list[Vector]):
         self.__x_dim = x_dim
         self.__y_dim = y_dim
         self.__z_dim = z_dim
         self.__vector_set = vector_set
-        self.__percentage_calculator = percentage_calculator
 
     def generate_noise(self) -> SharedArray:
         shared_array = SharedArray(self.__x_dim.range, self.__y_dim.range, self.__z_dim.range)
@@ -70,7 +68,6 @@ class PerlinNoiseGenerator:
                     task.start()
         for task in tasks:
             task.join()
-        shared_array.normalize(0, 255)
         return shared_array
 
     def generate_unit_noise(self, shared_array, grid_vectors, x, grid_x, dist_x, fade_x, y_offset, y_len, z_offset, z_len):

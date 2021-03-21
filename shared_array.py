@@ -36,5 +36,9 @@ class SharedArray:
         for i in range(len(self.__array)):
             self.__array[i] = lower_limit + scale * ((self.__array[i] - min_val) / array_range)
 
+    def add_noise(self, noise, scale):
+        for i in range(len(self.__array)):
+            self.__array[i] += noise.__array[i] * scale
+
     def __compute_index(self, x: int, y: int, z: int):
         return x * self.__y_size * self.__z_size + y * self.__z_size + z
